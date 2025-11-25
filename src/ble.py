@@ -4,15 +4,21 @@ from dataclasses import dataclass
 import threading
 import logging
 
-from bleak import BleakClient, BleakScanner
+from bleak import BleakClient
 
 logger = logging.getLogger(__name__)
 
+# STM addresses
+TARGET_DEVICE_ADDRS = [
+    "da:ba:77:98:10:11",
+    "d8:94:7e:7b:0b:6a",
+]
+
 @dataclass
 class ControllerPacket:
+    device_index: int = 0
     buttons: int
-    x: int
-    y: int
+    time: int
 
 
 class BLE:
@@ -44,69 +50,80 @@ class BLE:
     async def ble_main(self):
         """
         Main BLE coroutine:
-        - scan for device
-        - connect
-        - subscribe to notifications
-        - keep the connection alive
+        - connect to all addresses in TARGET_DEVICE_ADDRS
+        - subscribe to notifications on each
+        - keep all connection alive
         """
-        addr = await self.find_device()
-        if addr is None:
-            logger.info(f"BLE: device not found, aborting")
+        if not TARGET_DEVICE_ADDRS:
+            logger.error("BLE: no TARGET_DEVICE_ADDRS configured")
             return
         
-        logger.info(f"BLE: connecting to {addr}")
-        async with BleakClient(addr) as client:
-            logger.info(f"BLE: connected")
-            self.ble_connected = True
+        logger.info(f"BLE: starting {len(TARGET_DEVICE_ADDRS)} connections")
+        
+        tasks = [
+            self._run_single_client(addr, idx)
+            for idx, addr in enumerate(TARGET_DEVICE_ADDRS)
+        ]
 
-            logger.info(f"BLE: starting notification on {self.char_uuid}")
-            await client.start_notify(self.char_uuid, self.notification_handler)
-
-            try:
-                while True:
-                    if not client.is_connected:
-                        logger.info(f"BLE: disconnected")
-                    await asyncio.sleep(0.1)
-            finally:
-                self.ble_connected = False
-                try:
-                    await client.stop_notify(self.char_uuid)
-                except Exception:
-                    pass
-                logger.info(f"BLE: exiting ble_main")
+        await asyncio.gather(*tasks)
 
     # --------- internal helpers --------------------
 
-    async def find_device(self):
-        logger.info(f"Scanning for {self.device_name}")
-        devices = await BleakScanner.discover(timeout=5.0)
+    async def _run_single_client(self, address: str, device_index: int):
+        """
+        Handle a single physical device:
+        - connect (with auto-retry)
+        - start notifications
+        - feed packets into self.input_queue
+        """
+        while True:
+            try:
+                logger.info(f"BLE[{device_index}]: connecting to {address}")
+                async with BleakClient(address) as client:
+                    if not client.is_connected:
+                        logger.warning(f"BLE[{device_index}]: connection failed to {address}")
+                        await asyncio.sleep(1.0)
+                        continue
 
-        for d in devices:
-            if d.name and self.device_name.lower() in d.name.lower():
-                logger.info(f"Found: {d.name}, {d.address}")
-                return d.address
+                    logger.info(f"BLE[{device_index}]: connected to {address}")
+                    self.ble_connected = True
 
-        logger.info(f"No device matching name found")
-        return None
-    
-    def notification_handler(self, sender: int, data: bytearray) -> None:
+                    handler = self._make_notification_handler(device_index)
+                    logger.info(f"BLE[{device_index}]: starting notify on {self.char_uuid}")
+                    await client.start_notify(self.char_uuid, handler)
 
-        logger.info(f"Notification from {sender}")
-        logger.info(f"  raw: {data}")
-        logger.info(f"  as list: {list(data)}")
+                    try:
+                        while True:
+                            if not client.is_connected:
+                                logger.info(f"BLE[{device_index}]: disconnected")
+                                break
+                            await asyncio.sleep(0.1)
+                    finally:
+                        try:
+                            await client.stop_notify(self.char_uuid)
+                        except Exception:
+                            pass
+                        logger.info(f"BLE[{device_index}]: notify stopped")
+                        self.ble_connected = False
+
+            except Exception as e:
+                logger.exception(f"BLE[{device_index}]: error while connected to {address}: {e}")
+
+            logger.info(f"BLE[{device_index}]: retrying connection in 1s")
+            await asyncio.sleep(1.0)
+
+
+    def _make_notification_handler(self, device_index: int):
+        def handler(sender: int, data: bytearray) -> None:
+            logger.info(f"BLE[{device_index}]: Notification from {sender}")
+            logger.info(f"  raw: {data}")
+            logger.info(f"  as list: {list(data)}")
+            
+            device_index = data[0]
+            buttons = data[1]
+            time = data[2]
+
+            pkt = ControllerPacket(device_index=device_index, buttons=buttons, time=time)
+            self.input_queue.put(pkt)
+        return handler
         
-        if len(data) < 3:
-            logger.info(f"Notification too short {data}")
-            return
-        
-        buttons = data[0]
-        x_raw = data[1]
-        y_raw = data[2]
-
-        x = x_raw - 128
-        y = y_raw - 128
-
-        pkt = ControllerPacket(buttons=buttons, x=x, y=y)
-        self.input_queue.put(pkt)
-
-    
