@@ -1,13 +1,11 @@
-from typing import Optional
 import logging
 
 from src.ble import BLE
 from src.game import Game
 
 
-SERVICE_UUID = "12345678-1234-5678-1234-56789abcdef0"
-CHAR_UUID = "12345678-1234-5678-1234-56789abcdef1"
-DEVICE_NAME: Optional[str] = "Note20"
+SERVICE_UUID = "00000000-0001-11e1-ffff-ffffffffffbb"
+CHAR_UUID = "00000000-0001-11e1-ffff-ffffffffffdd"
 
 RESOLUTION = (1280, 720)
 
@@ -20,7 +18,7 @@ def main():
     )
     logger = logging.getLogger(__name__)
 
-    ble = BLE(SERVICE_UUID, CHAR_UUID, DEVICE_NAME)
+    ble = BLE(SERVICE_UUID, CHAR_UUID)
     ble.start_ble_thread()
     game = Game(ble, RESOLUTION)
     game.run()

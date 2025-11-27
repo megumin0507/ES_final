@@ -21,12 +21,13 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.pos = pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
+        self.background_img = pygame.image.load("sprites\\background.png").convert_alpha()
         self.button_img = pygame.image.load("sprites\\L_Red.png").convert_alpha()
         self.button_img = pygame.transform.scale_by(self.button_img, 0.5)
 
-        self.buttons_state = 0
-        self.x_axis = 0
-        self.y_axis = 0
+        self.device_index = 0
+        self.buttons = 0
+        self.time = 0
 
         self.dt = 0
         self.running = True
@@ -42,15 +43,13 @@ class Game:
             try:
                 while True:
                     pkt = ble.retrieve_pkt()
-                    self.buttons_state = pkt.buttons
-                    self.x_axis = pkt.x
-                    self.y_axis = pkt.y
+                    self.device_index = pkt.device_index
+                    self.buttons = pkt.buttons
+                    self.time = pkt.time
             except queue.Empty:
                 pass
-
-            self.pos.x = max(0, min(800, self.pos.x + self.x_axis * self.dt))
-            self.pos.y = max(0, min(600, self.pos.y + self.y_axis * self.dt))
-
+            
+            self.screen.blit(self.background_img, (0, 0))
             self.screen.blit(self.button_img, self.pos)
 
             pygame.display.flip()

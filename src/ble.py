@@ -16,16 +16,15 @@ TARGET_DEVICE_ADDRS = [
 
 @dataclass
 class ControllerPacket:
-    device_index: int = 0
+    device_index: int
     buttons: int
     time: int
 
 
 class BLE:
-    def __init__(self, service_uuid, char_uuid, device_name):
+    def __init__(self, service_uuid, char_uuid):
         self.service_uuid = service_uuid
         self.char_uuid = char_uuid
-        self.device_name = device_name
         
         self.input_queue: "queue.Queue[ControllerPacket]" = queue.Queue()
         self.ble_connected = False
@@ -117,12 +116,12 @@ class BLE:
         def handler(sender: int, data: bytearray) -> None:
             logger.info(f"BLE[{device_index}]: Notification from {sender}")
             logger.info(f"  raw: {data}")
-            logger.info(f"  as list: {list(data)}")
             
-            device_index = data[0]
-            buttons = data[1]
-            time = data[2]
+            time = data[0]
+            time += 256 * data[1]
+            buttons = data[2]
 
+            logger.info(f"  buttons = {buttons}, time = {time}")
             pkt = ControllerPacket(device_index=device_index, buttons=buttons, time=time)
             self.input_queue.put(pkt)
         return handler
