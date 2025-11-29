@@ -2,6 +2,7 @@ import pygame
 import queue
 import logging
 from src.ble import BLE
+from src.scene import Scene
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +20,7 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode(self.resolution)
         self.clock = pygame.time.Clock()
-
-        self.pos = pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
-        self.background_img = pygame.image.load("sprites\\background.png").convert_alpha()
-        self.button_img = pygame.image.load("sprites\\L_Red.png").convert_alpha()
-        self.button_img = pygame.transform.scale_by(self.button_img, 0.5)
+        self.scene = Scene(self.screen)
 
         self.device_index = 0
         self.buttons = 0
@@ -37,9 +34,6 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-            
-            self.screen.fill(pygame.Color(239, 233, 227))
-
             try:
                 while True:
                     pkt = ble.retrieve_pkt()
@@ -49,9 +43,7 @@ class Game:
             except queue.Empty:
                 pass
             
-            self.screen.blit(self.background_img, (0, 0))
-            self.screen.blit(self.button_img, self.pos)
-
+            self.scene.run()
             pygame.display.flip()
 
             keys = pygame.key.get_pressed()
