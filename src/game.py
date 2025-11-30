@@ -29,11 +29,21 @@ class Game:
         self.dt = 0
         self.running = True
 
+        self.last_switch_time = pygame.time.get_ticks() 
+        self.switch_interval = 5000 
+
     def loop(self, ble: BLE):
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+
+            # Set a new sequence
+            current_time = pygame.time.get_ticks()
+            if current_time - self.last_switch_time > self.switch_interval:
+                self.scene.set_random_sequence() 
+                self.last_switch_time = current_time
+            
             try:
                 while True:
                     pkt = ble.retrieve_pkt()
