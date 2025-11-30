@@ -26,7 +26,6 @@ class Game:
         self.buttons = 0
         self.time = 0
 
-        self.dt = 0
         self.running = True
 
         self.last_switch_time = pygame.time.get_ticks() 
@@ -34,6 +33,9 @@ class Game:
 
     def loop(self, ble: BLE):
         while self.running:
+            
+            dt = self.clock.tick(60) / 1000
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
@@ -53,14 +55,13 @@ class Game:
             except queue.Empty:
                 pass
             
-            self.scene.run()
+            self.scene.run(dt)
             pygame.display.flip()
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_q]:
                 self.running = False
 
-            self.dt = self.clock.tick(60) / 1000
 
     def quit(self):
         pygame.quit()
