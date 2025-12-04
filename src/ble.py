@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 # STM addresses
 TARGET_DEVICE_ADDRS = [
-    # "da:ba:77:98:10:11",
-    "d4:8c:49:eb:82:f6",
+    "da:ba:77:98:10:11",
+    # "d4:8c:49:eb:82:f6",
     "d8:94:7e:7b:0b:6a",
 ]
 

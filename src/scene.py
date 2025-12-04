@@ -20,6 +20,18 @@ class Scene:
             pygame.Vector2(907, y_pos),  # Slot 7
             pygame.Vector2(1043, y_pos)  # Slot 8
         ]
+        
+        A_ypos = 700
+        self.A_slot_positions = [
+            pygame.Vector2(91, A_ypos),   # Slot 1
+            pygame.Vector2(227, A_ypos),  # Slot 2
+            pygame.Vector2(363, A_ypos),  # Slot 3
+            pygame.Vector2(499, A_ypos),  # Slot 4
+            pygame.Vector2(635, A_ypos),  # Slot 5
+            pygame.Vector2(771, A_ypos),  # Slot 6
+            pygame.Vector2(907, A_ypos),  # Slot 7
+            pygame.Vector2(1043, A_ypos)  # Slot 8
+        ]
         self.notes: list[Note] = []
         self.k = 0
         self.set_random_sequence()
@@ -45,28 +57,54 @@ class Scene:
 
     def set_random_sequence(self):
         self.notes = []
-        options = [
-            self.L_blue_img,
-            self.L_red_img,
-            self.R_blue_img,
-            self.R_red_img
-        ]
+        
+        options = [0, 1, 2, 3]
         w = [10, 10, 10, 10]
         self.k = random.randint(4, 8)
-        imgs = random.choices(options, weights=w, k=self.k)
-        for i in range(self.k):
-            self.notes.append(Note(self.slot_positions[i], imgs[i]))
-
-
-    def _load_sprites(self):
-        def scale(img, scale_factor=0.5):
-            new_width = int(img.get_width() * scale_factor)
-            new_height = int(img.get_height() * scale_factor)
-            return pygame.transform.smoothscale(img, (new_width, new_height))
+        self.answer = random.choices(options, weights=w, k=self.k)
+        print(self.answer)
         
+        for i in range(self.k):
+            id = self.answer[i]
+            self.notes.append(Note(self.slot_positions[i], id))
+
+
+    def _load_sprites(self):        
         self.background_img = pygame.image.load(f"{sprites_dir}background.png").convert_alpha()
         self.textboxes_img = pygame.image.load(f"{sprites_dir}textbox.png").convert_alpha()
-        self.L_blue_img = scale(pygame.image.load(f"{sprites_dir}L_Blue.png").convert_alpha())
-        self.L_red_img = scale(pygame.image.load(f"{sprites_dir}L_Red.png").convert_alpha())
-        self.R_blue_img = scale(pygame.image.load(f"{sprites_dir}R_Blue.png").convert_alpha())
-        self.R_red_img = scale(pygame.image.load(f"{sprites_dir}R_Red.png").convert_alpha())
+
+    def show_user_motion(self, motion_id, pos):
+        """
+        當接收到訊號時，顯示出來
+        """
+        note_shown = Note(self.A_slot_positions[pos], motion_id)
+        self.screen.blit(note_shown.get_img() , note_shown.pos)
+        print(f"Visual: Drum {motion_id} hit!")
+
+    def draw_result_text(self, text):
+        """
+        在螢幕中央畫出 PERFECT 或 FAIL
+        """
+        # 1. 建立字型 (如果這行覺得卡頓，建議把 font 宣告移到 _init_ 裡)
+        # 參數: 字體名稱, 大小, 粗體
+        font = pygame.font.SysFont("Arial", 80, bold=True)
+        
+        # 2. 決定顏色 (包含 "FAIL" 字樣就紅色，不然就綠色)
+        if "FAIL" in text:
+            color = (255, 50, 50)   # 紅色
+        else:
+            color = (50, 255, 50)   # 綠色
+
+        # 3. 渲染文字圖片 (文字, 反鋸齒, 顏色)
+        text_surface = font.render(text, True, color)
+        
+        # 4. 取得螢幕的中心點並計算文字位置
+        # 這裡假設你的 Scene 裡有 self.screen，如果沒有，請改用 pygame.display.get_surface()
+        screen = pygame.display.get_surface() 
+        screen_rect = screen.get_rect()
+        
+        # 讓文字的中心點 = 螢幕的中心點
+        text_rect = text_surface.get_rect(center=screen_rect.center)
+        
+        # 5. 畫上去
+        screen.blit(text_surface, text_rect)
