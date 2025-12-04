@@ -3,8 +3,8 @@ import math
 
 class Note:
     def __init__(self, pos: pygame.Vector2, img):
-        self.original_pos = pos
-        self.pos = pos
+        self.original_pos = pos.copy()
+        self.pos = pos.copy()
         self.img = img
         self.jumping = False
         self.jumped = False
