@@ -73,7 +73,7 @@ class Scene:
             step_beats = random.randint(1, 3)
             interval = step_beats * beat_unit
             total_delay_seconds += interval
-            self.notes.append(Note(self.Q_slot_positions[i], id, delay = total_delay_seconds))
+            self.Q_notes.append(Note(self.Q_slot_positions[i], id, delay = total_delay_seconds))
         total_time_seconds = total_delay_seconds + (0.4 * self.Qlength)
         self.switch_interval = total_time_seconds * 1000
 
@@ -88,7 +88,7 @@ class Scene:
         """
         if 0 <= motion_id <= 3:
             note_shown = Note(self.A_slot_positions[pos], motion_id)
-            self.screen.blit(note_shown.get_img() , note_shown.pos)
+            self.player_notes.append(note_shown)
             print(f"Visual: Drum {motion_id} hit!")
 
     def draw_result_text(self, text):
