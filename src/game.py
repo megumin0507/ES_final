@@ -26,14 +26,34 @@ class Game:
         self.buttons = 0
         self.time = 0
 
-        self.running = True
-        self.player_sequence = []
+        self.running = False
         self.score_result = None
+        
+        self.player_sequence_class = []
+        self.player_sequence_time = []
 
         self.last_switch_time = pygame.time.get_ticks() 
         self.switch_interval = self.scene.switch_interval
 
     def loop(self, ble: BLE):
+        # 等待 BLE 連接
+        logger.info("Waiting for BLE connection...")
+        self.scene.draw_waiting_text("Waiting for BLE connection...")
+        pygame.display.flip()
+        
+        while not ble.ble_connected:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                    return
+            pygame.time.wait(100)  # 避免 CPU 空轉
+        
+        logger.info("BLE connected! Starting game...")
+        self.scene.draw_waiting_text("BLE Connected! Starting...")
+        pygame.display.flip()
+        self.running = True
+        pygame.time.wait(1000)  # 顯示 1 秒後開始
+
         while self.running:
             
             dt = self.clock.tick(60) / 1000
@@ -50,7 +70,8 @@ class Game:
                 self.scene.set_random_sequence() 
                 self.switch_interval = self.scene.switch_interval
                 self.last_switch_time = current_time
-                self.player_sequence = []
+                self.player_sequence_class = []
+                self.player_sequence_time = []
                 self.score_result = None 
             
             try:
@@ -66,12 +87,17 @@ class Game:
                         continue
                         
                     if self.score_result is None:
-                        self.player_sequence.append(motion)
+                        self.player_sequence_class.append(motion)
+                        if len(self.player_sequence_time)==0:
+                            self.player_sequence_time.append(0)
+                        else:
+                            self.player_sequence_time.append(self.time)
                         # 檢查動作數量 (Pattern Finished)
-                        if len(self.player_sequence) >= len(self.scene.answer):
+                        if len(self.player_sequence_class) >= self.scene.ans_length:
                             self.calculate_score(is_timeout=False)  
                         # display
-                        self.scene.show_user_motion(motion, len(self.player_sequence) - 1)
+                        print(sum(self.player_sequence_time))
+                        self.scene.show_user_motion(motion, sum(self.player_sequence_time)) # time
 
             except queue.Empty:
                 pass
@@ -88,35 +114,46 @@ class Game:
                 self.running = False
 
     def calculate_score(self, is_timeout=False):
-        target = self.scene.answer
-        actual = self.player_sequence
+        ans_class = self.scene.ans_class
+        ans_time = self.scene.ans_time
+        ans_length = self.scene.ans_length
+        player_class = self.player_sequence_class
+        player_time = self.player_sequence_time
         
-        # 狀況 A: 時間到但沒打完 -> Fail
-        if is_timeout:
+        # 時間到但沒打完 or 沒打 -> Fail
+        if is_timeout or len(player_class)==0:
             self.score_result = "TIMEOUT FAIL"
-            print(f"Time out! Input: {actual}, Target: {target}")
+            print(f"Time out!")
             return
 
-        # 狀況 B: 數量不對 (理論上上面判斷過長度才會進來，這邊做個保險)
-        if len(actual) != len(target):
-            self.score_result = "LENGTH FAIL"
-            return
 
-        # 狀況 C: 逐字比對 (Algorithm)
-        # 只要有一個不一樣就是 Fail，全部一樣才是 Perfect
-        is_perfect = True
-        for i in range(len(target)):
-            if actual[i] % 2 != target[i]%2:
-                is_perfect = False
+        # 逐字比對 (Algorithm)
+        # 只要有一個不一樣就是 Fail
+        quality = 2
+        for i in range(ans_length):
+            if player_class[i] % 2 != ans_class[i]%2:
+                quality= 0
                 break
+        else:
+            # rhythm
+            player_time[0] = 0
+            loss = 0
+            for i in range(ans_length):
+                loss += abs(player_time[i] - ans_time[i])
+            if loss > 300: # threshold可調
+                quality = 1
+            print(f"Total time loss: {loss} ms")
         
-        if is_perfect:
+        if quality==2:
             self.score_result = "PERFECT"
             print("PERFECT!")
             # 可以在這裡加分 self.score += 100
+        elif quality==1:
+            self.score_result = "GOOD"
+            print("GOOD!")
         else:
             self.score_result = "FAIL"
-            print(f"FAIL! Input: {actual}, Target: {target}")
+            print(f"FAIL! Input: {player_class}, Target: {ans_class}")
 
     def quit(self):
         pygame.quit()

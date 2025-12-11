@@ -35,13 +35,13 @@ class Scene:
         ]
 
         self.player_notes: list[Note] = []  # 保存玩家輸入的 notes
-        self.Qlength = 0
+        self.ans_length = 0
         self.set_random_sequence()
 
     def load_game_scene(self, dt):
         self.screen.blit(self.background_img, (0, 0))
         self.screen.blit(self.textboxes_img, (0, 0))
-        for i in range(self.Qlength):
+        for i in range(self.ans_length):
             note = self.Q_notes[i]
             pre_note = self.Q_notes[i-1] if i != 0 else None
             img = note.get_img()
@@ -57,37 +57,53 @@ class Scene:
             self.screen.blit(player_note.get_img(), player_note.pos)
 
     def set_random_sequence(self):
+        beat_unit = 400 # const ms
+        self.player_notes = [] # 只是清空
+        
+        options = [-1, 0, 1, 2, 3]
+        w = [10, 10, 10, 10, 10]
+        first = random.choices(options[1:], weights=w[1:], k=1)
+        rest = random.choices(options, weights=w, k=7)
+        self.Q = first+rest
+        # base on slot ans generate answer
+        self.ans_class = first
+        self.ans_time = [0] #第一個一定是0
+        self.ans_length = 1
+        t_interval = beat_unit
+        for slot in rest:
+            if slot==-1:
+                t_interval += beat_unit
+            else:
+                self.ans_class.append(slot)
+                self.ans_time.append(t_interval)
+                self.ans_length += 1
+                t_interval = beat_unit
+        
+        print(self.Q)
+        print(self.ans_class)
+        print(self.ans_time)
+        print(self.ans_length)
+        
         self.Q_notes = []
-        self.player_notes = []
-        
-        options = [0, 1, 2, 3]
-        w = [10, 10, 10, 10]
-        self.Qlength = random.randint(4, 8)
-        self.answer = random.choices(options, weights=w, k=self.Qlength)
-        print(self.answer)
-        
-        beat_unit = 0.3
-        total_delay_seconds = 0.0
-        for i in range(self.Qlength):
-            id = self.answer[i]
-            step_beats = random.randint(1, 3)
-            interval = step_beats * beat_unit
-            total_delay_seconds += interval
-            self.Q_notes.append(Note(self.Q_slot_positions[i], id, delay = total_delay_seconds))
-        total_time_seconds = total_delay_seconds + (0.4 * self.Qlength)
-        self.switch_interval = total_time_seconds * 1000
+        for i in range(8): # generate note object
+            if self.Q[i] == -1:
+                continue
+            else:
+                self.Q_notes.append(Note(self.Q_slot_positions[i], self.Q[i], delay = i*beat_unit/1000))
+            
+        self.switch_interval = 18*beat_unit
 
 
     def _load_sprites(self):        
         self.background_img = pygame.image.load(f"{sprites_dir}background.png").convert_alpha()
         self.textboxes_img = pygame.image.load(f"{sprites_dir}textbox.png").convert_alpha()
 
-    def show_user_motion(self, motion_id, pos):
+    def show_user_motion(self, motion_id, time):
         """
         當接收到訊號時，顯示出來
         """
         if 0 <= motion_id <= 3:
-            note_shown = Note(self.A_slot_positions[pos], motion_id)
+            note_shown = Note(pygame.Vector2(91 + time/400*136, 450), motion_id)
             self.player_notes.append(note_shown)
             print(f"Visual: Drum {motion_id} hit!")
 
@@ -118,3 +134,12 @@ class Scene:
         
         # 5. 畫上去
         screen.blit(text_surface, text_rect)
+        
+    def draw_waiting_text(self, text):
+        """顯示等待 BLE 連接的文字"""
+        self.screen.fill((0, 0, 0))  # 清空畫面
+        font = pygame.font.Font(None, 72)
+        text_surface = font.render(text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(self.screen.get_width() // 2, 
+                                                self.screen.get_height() // 2))
+        self.screen.blit(text_surface, text_rect)
