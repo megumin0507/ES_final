@@ -58,7 +58,7 @@ class BLE:
             logger.error("BLE: no TARGET_DEVICE_ADDRS configured")
             return
         
-        logger.info(f"BLE: starting {len(TARGET_DEVICE_ADDRS)} connections")
+        # logger.info(f"BLE: starting {len(TARGET_DEVICE_ADDRS)} connections")
         
         tasks = [
             self._run_single_client(addr, idx)
@@ -78,7 +78,7 @@ class BLE:
         """
         while True:
             try:
-                logger.info(f"BLE[{device_index}]: connecting to {address}")
+                # logger.info(f"BLE[{device_index}]: connecting to {address}")
                 async with BleakClient(address) as client:
                     if not client.is_connected:
                         logger.warning(f"BLE[{device_index}]: connection failed to {address}")
@@ -89,7 +89,7 @@ class BLE:
                     self.ble_connected = True
 
                     handler = self._make_notification_handler(device_index)
-                    logger.info(f"BLE[{device_index}]: starting notify on {self.char_uuid}")
+                    # logger.info(f"BLE[{device_index}]: starting notify on {self.char_uuid}")
                     await client.start_notify(self.char_uuid, handler)
 
                     try:
@@ -103,20 +103,21 @@ class BLE:
                             await client.stop_notify(self.char_uuid)
                         except Exception:
                             pass
-                        logger.info(f"BLE[{device_index}]: notify stopped")
+                        # logger.info(f"BLE[{device_index}]: notify stopped")
                         self.ble_connected = False
 
             except Exception as e:
-                logger.exception(f"BLE[{device_index}]: error while connected to {address}: {e}")
+                pass
+                # logger.exception(f"BLE[{device_index}]: error while connected to {address}: {e}")
 
-            logger.info(f"BLE[{device_index}]: retrying connection in 1s")
+            # logger.info(f"BLE[{device_index}]: retrying connection in 1s")
             await asyncio.sleep(1.0)
 
 
     def _make_notification_handler(self, device_index: int):
         def handler(sender: int, data: bytearray) -> None:
-            logger.info(f"BLE[{device_index}]: Notification from {sender}")
-            logger.info(f"  raw: {data}")
+            # logger.info(f"BLE[{device_index}]: Notification from {sender}")
+            # logger.info(f"  raw: {data}")
             
             time = data[0]
             time += 256 * data[1]

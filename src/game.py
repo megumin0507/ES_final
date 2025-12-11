@@ -60,19 +60,22 @@ class Game:
                     self.time = pkt.time
 
                     motion =  self.device_index*2 + self.buttons-1 
+                    if motion < 0 or motion > 3:
+                        print("invalid motion")
+                        continue
+                        
                     if self.score_result is None:
                         self.player_sequence.append(motion)
                         # 檢查動作數量 (Pattern Finished)
                         if len(self.player_sequence) >= len(self.scene.answer):
-                            self.calculate_score(is_timeout=False)
-                    
-                    # display
-                    self.scene.show_user_motion(motion, len(self.player_sequence) - 1)
+                            self.calculate_score(is_timeout=False)  
+                        # display
+                        self.scene.show_user_motion(motion, len(self.player_sequence) - 1)
 
             except queue.Empty:
                 pass
             
-            self.scene.run(dt)
+            self.scene.load_game_scene(dt)
 
             # 如果有結果，畫出結果文字 (Perfect / Fail)
             if self.score_result:
@@ -102,7 +105,7 @@ class Game:
         # 只要有一個不一樣就是 Fail，全部一樣才是 Perfect
         is_perfect = True
         for i in range(len(target)):
-            if actual[i] != target[i]:
+            if actual[i] % 2 != target[i]%2:
                 is_perfect = False
                 break
         

@@ -9,19 +9,20 @@ class Scene:
         self._load_sprites()
         self.screen = screen
         
-        y_pos = 100
-        self.slot_positions = [
-            pygame.Vector2(91, y_pos),   # Slot 1
-            pygame.Vector2(227, y_pos),  # Slot 2
-            pygame.Vector2(363, y_pos),  # Slot 3
-            pygame.Vector2(499, y_pos),  # Slot 4
-            pygame.Vector2(635, y_pos),  # Slot 5
-            pygame.Vector2(771, y_pos),  # Slot 6
-            pygame.Vector2(907, y_pos),  # Slot 7
-            pygame.Vector2(1043, y_pos)  # Slot 8
+        Q_ypos = 100
+        self.Q_slot_positions = [
+            pygame.Vector2(91, Q_ypos),   # Slot 1
+            pygame.Vector2(227, Q_ypos),  # Slot 2
+            pygame.Vector2(363, Q_ypos),  # Slot 3
+            pygame.Vector2(499, Q_ypos),  # Slot 4
+            pygame.Vector2(635, Q_ypos),  # Slot 5
+            pygame.Vector2(771, Q_ypos),  # Slot 6
+            pygame.Vector2(907, Q_ypos),  # Slot 7
+            pygame.Vector2(1043, Q_ypos)  # Slot 8
         ]
+        self.Q_notes: list[Note] = []
         
-        A_ypos = 700
+        A_ypos = 450
         self.A_slot_positions = [
             pygame.Vector2(91, A_ypos),   # Slot 1
             pygame.Vector2(227, A_ypos),  # Slot 2
@@ -32,19 +33,17 @@ class Scene:
             pygame.Vector2(907, A_ypos),  # Slot 7
             pygame.Vector2(1043, A_ypos)  # Slot 8
         ]
-        self.notes: list[Note] = []
-        self.k = 0
-        self.set_random_sequence()
 
-    def run(self, dt):
-        self.load_game_scene(dt)
+        self.player_notes: list[Note] = []  # 保存玩家輸入的 notes
+        self.Qlength = 0
+        self.set_random_sequence()
 
     def load_game_scene(self, dt):
         self.screen.blit(self.background_img, (0, 0))
         self.screen.blit(self.textboxes_img, (0, 0))
-        for i in range(self.k):
-            note = self.notes[i]
-            pre_note = self.notes[i-1] if i != 0 else None
+        for i in range(self.Qlength):
+            note = self.Q_notes[i]
+            pre_note = self.Q_notes[i-1] if i != 0 else None
             img = note.get_img()
             pos = note.get_pos(dt)
             if pre_note is not None: # not first note
@@ -54,19 +53,22 @@ class Scene:
                 if note.should_jump():
                     note.jump()
             self.screen.blit(img, pos)
+        for player_note in self.player_notes:
+            self.screen.blit(player_note.get_img(), player_note.pos)
 
     def set_random_sequence(self):
-        self.notes = []
+        self.Q_notes = []
+        self.player_notes = []
         
         options = [0, 1, 2, 3]
         w = [10, 10, 10, 10]
-        self.k = random.randint(4, 8)
-        self.answer = random.choices(options, weights=w, k=self.k)
+        self.Qlength = random.randint(4, 8)
+        self.answer = random.choices(options, weights=w, k=self.Qlength)
         print(self.answer)
         
-        for i in range(self.k):
+        for i in range(self.Qlength):
             id = self.answer[i]
-            self.notes.append(Note(self.slot_positions[i], id))
+            self.Q_notes.append(Note(self.Q_slot_positions[i], id))
 
 
     def _load_sprites(self):        
@@ -78,7 +80,7 @@ class Scene:
         當接收到訊號時，顯示出來
         """
         note_shown = Note(self.A_slot_positions[pos], motion_id)
-        self.screen.blit(note_shown.get_img() , note_shown.pos)
+        self.player_notes.append(note_shown)
         print(f"Visual: Drum {motion_id} hit!")
 
     def draw_result_text(self, text):
@@ -87,7 +89,7 @@ class Scene:
         """
         # 1. 建立字型 (如果這行覺得卡頓，建議把 font 宣告移到 _init_ 裡)
         # 參數: 字體名稱, 大小, 粗體
-        font = pygame.font.SysFont("Arial", 80, bold=True)
+        font = pygame.font.SysFont("Arial", 120, bold=True)
         
         # 2. 決定顏色 (包含 "FAIL" 字樣就紅色，不然就綠色)
         if "FAIL" in text:
