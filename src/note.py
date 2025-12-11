@@ -4,10 +4,12 @@ import math
 sprites_dir = ".\\sprites\\"
 
 class Note:
-    def __init__(self, pos: pygame.Vector2, id):
+    def __init__(self, pos: pygame.Vector2, id, delay: float = 1.0):
         self.original_pos = pos.copy()
         self.pos = pos.copy()
         self.id = id
+        self.delay_duration = delay
+        self.jumped_delay_timer = self.delay_duration
         self.jumping = False
         self.jumped = False
         self.v = pygame.Vector2(0, 0)
@@ -43,17 +45,15 @@ class Note:
                 self.pos = self.original_pos
                 self.jumping = False
                 self.jumped = True
+        if self.jumped_delay_timer > 0:
+            self.jumped_delay_timer -= dt
+            if self.jumped_delay_timer <= 0:
+                self.jumped_delay_timer = 0
         return self.pos
     
     def should_jump(self):
-        return not self.is_jumping() and not self.has_jumped()
+        return not self.jumping and not self.jumped
     
     def jump(self):
         self.jumping = True
         self.v.y = -1000
-
-    def is_jumping(self):
-        return self.jumping
-    
-    def has_jumped(self):
-        return self.jumped

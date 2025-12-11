@@ -47,7 +47,7 @@ class Scene:
             img = note.get_img()
             pos = note.get_pos(dt)
             if pre_note is not None: # not first note
-                if note.should_jump() and pre_note.has_jumped():
+                if note.should_jump() and note.jumped_delay_timer <= 0:
                     note.jump()
             else: # first note
                 if note.should_jump():
@@ -66,9 +66,16 @@ class Scene:
         self.answer = random.choices(options, weights=w, k=self.Qlength)
         print(self.answer)
         
+        beat_unit = 0.3
+        total_delay_seconds = 0.0
         for i in range(self.Qlength):
             id = self.answer[i]
-            self.Q_notes.append(Note(self.Q_slot_positions[i], id))
+            step_beats = random.randint(1, 3)
+            interval = step_beats * beat_unit
+            total_delay_seconds += interval
+            self.notes.append(Note(self.Q_slot_positions[i], id, delay = total_delay_seconds))
+        total_time_seconds = total_delay_seconds + (0.4 * self.Qlength)
+        self.switch_interval = total_time_seconds * 1000
 
 
     def _load_sprites(self):        
@@ -79,9 +86,10 @@ class Scene:
         """
         當接收到訊號時，顯示出來
         """
-        note_shown = Note(self.A_slot_positions[pos], motion_id)
-        self.player_notes.append(note_shown)
-        print(f"Visual: Drum {motion_id} hit!")
+        if 0 <= motion_id <= 3:
+            note_shown = Note(self.A_slot_positions[pos], motion_id)
+            self.screen.blit(note_shown.get_img() , note_shown.pos)
+            print(f"Visual: Drum {motion_id} hit!")
 
     def draw_result_text(self, text):
         """

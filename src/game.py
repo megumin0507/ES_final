@@ -31,7 +31,7 @@ class Game:
         self.score_result = None
 
         self.last_switch_time = pygame.time.get_ticks() 
-        self.switch_interval = 5000*4/3 
+        self.switch_interval = self.scene.switch_interval
 
     def loop(self, ble: BLE):
         while self.running:
@@ -48,6 +48,7 @@ class Game:
                 if self.score_result is None:
                      self.calculate_score(is_timeout=True)
                 self.scene.set_random_sequence() 
+                self.switch_interval = self.scene.switch_interval
                 self.last_switch_time = current_time
                 self.player_sequence = []
                 self.score_result = None 
