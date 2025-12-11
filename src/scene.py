@@ -1,6 +1,7 @@
 import pygame
 import random
 from src.note import Note
+from src.player import Player
 
 sprites_dir = ".\\sprites\\"
 
@@ -22,19 +23,7 @@ class Scene:
         ]
         self.Q_notes: list[Note] = []
         
-        A_ypos = 450
-        self.A_slot_positions = [
-            pygame.Vector2(91, A_ypos),   # Slot 1
-            pygame.Vector2(227, A_ypos),  # Slot 2
-            pygame.Vector2(363, A_ypos),  # Slot 3
-            pygame.Vector2(499, A_ypos),  # Slot 4
-            pygame.Vector2(635, A_ypos),  # Slot 5
-            pygame.Vector2(771, A_ypos),  # Slot 6
-            pygame.Vector2(907, A_ypos),  # Slot 7
-            pygame.Vector2(1043, A_ypos)  # Slot 8
-        ]
-
-        self.player_notes: list[Note] = []  # 保存玩家輸入的 notes
+        self.player_notes: list[Note] = []  # 保存玩家輸入的 notes，不分player
         self.ans_length = 0
         self.set_random_sequence()
 
@@ -60,8 +49,8 @@ class Scene:
         beat_unit = 400 # const ms
         self.player_notes = [] # 只是清空
         
-        options = [-1, 0, 1, 2, 3]
-        w = [10, 10, 10, 10, 10]
+        options = [-1, 0, 1]
+        w = [10, 15, 15]
         first = random.choices(options[1:], weights=w[1:], k=1)
         rest = random.choices(options, weights=w, k=7)
         self.Q = first+rest
@@ -98,19 +87,25 @@ class Scene:
         self.background_img = pygame.image.load(f"{sprites_dir}background.png").convert_alpha()
         self.textboxes_img = pygame.image.load(f"{sprites_dir}textbox.png").convert_alpha()
 
-    def show_user_motion(self, motion_id, time):
+    def show_user_motion(self, motion_id, time, player: Player):
         """
         當接收到訊號時，顯示出來
         """
-        if 0 <= motion_id <= 3:
-            note_shown = Note(pygame.Vector2(91 + time/400*136, 450), motion_id)
-            self.player_notes.append(note_shown)
-            print(f"Visual: Drum {motion_id} hit!")
+        if player.device_idx==0:
+            note_shown = Note(pygame.Vector2(91 + time/400*136, 350), motion_id)
+            self.player_notes.append(note_shown) #不分player
+            print(f"Visual:p1 Drum {motion_id} hit!")
+        else:
+            note_shown = Note(pygame.Vector2(91 + time/400*136, 550), motion_id)
+            self.player_notes.append(note_shown) #不分player
+            print(f"Visual:p2 Drum {motion_id} hit!")
 
-    def draw_result_text(self, text):
+    def draw_result_text(self, player: Player):
         """
         在螢幕中央畫出 PERFECT 或 FAIL
         """
+        text = player.score_result
+        id = player.device_idx
         # 1. 建立字型 (如果這行覺得卡頓，建議把 font 宣告移到 _init_ 裡)
         # 參數: 字體名稱, 大小, 粗體
         font = pygame.font.SysFont("Arial", 120, bold=True)
@@ -127,14 +122,10 @@ class Scene:
         # 4. 取得螢幕的中心點並計算文字位置
         # 這裡假設你的 Scene 裡有 self.screen，如果沒有，請改用 pygame.display.get_surface()
         screen = pygame.display.get_surface() 
-        screen_rect = screen.get_rect()
-        
-        # 讓文字的中心點 = 螢幕的中心點
-        text_rect = text_surface.get_rect(center=screen_rect.center)
         
         # 5. 畫上去
-        screen.blit(text_surface, text_rect)
-        
+        screen.blit(text_surface, pygame.Vector2(600, 350 if id ==0 else 550))
+
     def draw_waiting_text(self, text):
         """顯示等待 BLE 連接的文字"""
         self.screen.fill((0, 0, 0))  # 清空畫面

@@ -18,8 +18,8 @@ class Note:
         options = [
             self.R_blue_img,
             self.R_red_img,
-            self.L_blue_img,
-            self.L_red_img
+            # self.L_blue_img,
+            # self.L_red_img
         ]
         self.img = options[id]
 
@@ -29,8 +29,8 @@ class Note:
             new_height = int(img.get_height() * scale_factor)
             return pygame.transform.smoothscale(img, (new_width, new_height))
         
-        self.L_blue_img = scale(pygame.image.load(f"{sprites_dir}L_Blue.png").convert_alpha())
-        self.L_red_img = scale(pygame.image.load(f"{sprites_dir}L_Red.png").convert_alpha())
+        # self.L_blue_img = scale(pygame.image.load(f"{sprites_dir}L_Blue.png").convert_alpha())
+        # self.L_red_img = scale(pygame.image.load(f"{sprites_dir}L_Red.png").convert_alpha())
         self.R_blue_img = scale(pygame.image.load(f"{sprites_dir}R_Blue.png").convert_alpha())
         self.R_red_img = scale(pygame.image.load(f"{sprites_dir}R_Red.png").convert_alpha())
 
