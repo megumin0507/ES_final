@@ -46,4 +46,4 @@ class Note:
         self.a.y = 5000
 
     def is_out_of_screen(self):
-        return self.pos.x < -100 or self.pos.y > 600
+        return self.pos.x < -128 or self.pos.y > 720

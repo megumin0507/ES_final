@@ -100,6 +100,8 @@ class Game:
                         self.current_result_text = "MISS"
                         self.result_timer = 0.5
                         break
+                if note.is_out_of_screen():
+                    self.scene.Q_notes.remove(note)
             self.scene.draw_combo(self.combo)
 
             if self.current_result_text and self.result_timer > 0:
