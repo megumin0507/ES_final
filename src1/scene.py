@@ -29,7 +29,7 @@ class Scene:
             self.screen.blit(note.get_img(), note.pos)
 
     def set_random_sequence(self):
-        beat_unit = 500 
+        beat_unit = 200 
         self.notes = []
         
         options = [-1, 0, 1]
@@ -63,7 +63,7 @@ class Scene:
             self.Q_notes.append(new_note)
 
         last_note_x = self.Q_notes[-1].pos.x if self.Q_notes else 0
-        distance_to_finish = last_note_x + 200
+        distance_to_finish = last_note_x
         total_time_sec = distance_to_finish / self.NOTE_SPEED
         self.switch_interval = total_time_sec * 1000
 
@@ -108,7 +108,7 @@ class Scene:
         screen = pygame.display.get_surface() 
         screen_rect = screen.get_rect()
         
-        text_rect = text_surface.get_rect(center=screen_rect.center)
+        text_rect = text_surface.get_rect(center=(screen_rect.centerx, screen_rect.height * 0.65))
         
         screen.blit(text_surface, text_rect)
 
@@ -130,7 +130,7 @@ class Scene:
         text_surface = self.combo_font.render(text_str, True, color)
         
         screen_rect = self.screen.get_rect()
-        text_rect = text_surface.get_rect(center=(screen_rect.centerx, screen_rect.height * 0.75))
+        text_rect = text_surface.get_rect(center=(screen_rect.centerx, screen_rect.height * 0.8))
         
         self.screen.blit(text_surface, text_rect)
         

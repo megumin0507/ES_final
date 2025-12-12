@@ -18,6 +18,10 @@ class Game:
 
     def init(self):
         pygame.init()
+        pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+        self.don = pygame.mixer.Sound('don.wav')
+        self.ka = pygame.mixer.Sound('ka.wav')
+
         self.screen = pygame.display.set_mode(self.resolution)
         self.clock = pygame.time.Clock()
         self.scene = Scene(self.screen)
@@ -79,6 +83,10 @@ class Game:
                     motion =  self.device_index*2 + self.buttons-1 
                     if 0 <= motion <= 3:
                         self.handle_input(motion)
+                        if self.buttons == 1:
+                            self.ka.play()
+                        elif self.buttons == 2:
+                            self.don.play()
 
             except queue.Empty:
                 pass

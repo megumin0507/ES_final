@@ -19,6 +19,9 @@ class Game:
 
     def init(self):
         pygame.init()
+        pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+        self.don = pygame.mixer.Sound('don.wav')
+        self.ka = pygame.mixer.Sound('ka.wav')
         self.screen = pygame.display.set_mode(self.resolution)
         self.clock = pygame.time.Clock()
         self.scene = Scene(self.screen)
@@ -83,7 +86,11 @@ class Game:
                     button = pkt.buttons -1  # 0=側 1=下
                     time = pkt.time
 
-                    if button<0 or button > 1:
+                    if button==0:
+                        self.ka.play()
+                    elif button == 1:
+                        self.don.play()
+                    else:
                         print(button)
                         continue
                     # 選擇對應的玩家
