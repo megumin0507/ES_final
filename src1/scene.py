@@ -10,7 +10,8 @@ class Scene:
         self.screen = screen
         self.TARGET_X = 200
         self.NOTE_SPEED = 500  
-        self.HIT_THRESHOLD = 80
+        self.PERFECT_THRESHOLD = 42
+        self.GOOD_THRESHOLD = 64
         
         self.Q_ypos = 100
         self.Q_notes: list[Note] = []
@@ -31,8 +32,8 @@ class Scene:
         beat_unit = 500 
         self.notes = []
         
-        options = [-1, 0, 1, 2, 3]
-        w = [10, 10, 10, 10, 10]
+        options = [-1, 0, 1]
+        w = [10, 10, 10]
         sequence = random.choices(options, weights=w, k=8)
         if sequence[0] == -1: sequence[0] = 0
 
@@ -72,19 +73,23 @@ class Scene:
 
         for note in self.Q_notes:
             if not note.is_hit:
-                dist = abs(note.pos.x + 32 - self.TARGET_X)
+                dist = abs(note.pos.x + self.GOOD_THRESHOLD - self.TARGET_X)
                 if dist < min_dist:
                     min_dist = dist
                     target_note = note
         
-        if target_note and min_dist <= self.HIT_THRESHOLD:
-            # if user_input_id == target_note.id:
+        if target_note and min_dist <= self.GOOD_THRESHOLD:
             if user_input_id % 2 == target_note.id % 2:
-                target_note.jump()
-                print(f"Hit! Dist: {min_dist:.2f}")
-                return "PERFECT"
+                if min_dist <= self.PERFECT_THRESHOLD:
+                    target_note.jump()
+                    print(f"Hit! Dist: {min_dist:.2f}")
+                    return "PERFECT"
+                else:
+                    target_note.jump()
+                    print(f"Hit! Dist: {min_dist:.2f}")
+                    return "GOOD"
             else:
-                return "FAIL"
+                return "MISS"
         else:
             return None 
 
@@ -94,7 +99,7 @@ class Scene:
 
     def draw_result_text(self, text):
         font = pygame.font.SysFont("Arial", 120, bold=True)
-        if "FAIL" in text:
+        if "MISS" in text:
             color = (255, 50, 50)   # Red
         else:
             color = (50, 255, 50)   # Green
@@ -112,6 +117,7 @@ class Scene:
         顯示 Combo 數值
         位置：螢幕水平置中，偏下方
         """
+
         if combo_count <= 0:
             return
         if not hasattr(self, 'combo_font'):

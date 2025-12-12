@@ -84,6 +84,14 @@ class Game:
                 pass
             
             self.scene.load_game_scene(dt)
+            for note in self.scene.Q_notes:
+                if not note.is_hit:
+                    if note.pos.x + self.scene.GOOD_THRESHOLD - self.scene.TARGET_X < -self.scene.GOOD_THRESHOLD:
+                        self.combo = 0
+                        note.is_hit = True
+                        self.current_result_text = "MISS"
+                        self.result_timer = 0.5
+                        break
             self.scene.draw_combo(self.combo)
 
             if self.current_result_text and self.result_timer > 0:
