@@ -1,7 +1,7 @@
 import pygame
 import queue
 import logging
-from src1.ble import BLE
+from ble import BLE
 from src1.scene import Scene
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 import pygame
 import queue
 import logging
-from src2.ble import BLE
+from ble import BLE
 from src2.scene import Scene
 from src2.player import Player
 

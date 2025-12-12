@@ -1,6 +1,6 @@
 import pygame
 import random
-from src.note import Note
+from src1.note import Note
 
 sprites_dir = ".\\sprites\\"
 
