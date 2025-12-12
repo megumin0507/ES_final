@@ -49,7 +49,7 @@ class Scene:
         self.player_notes = [] # 只是清空
         
         options = [-1, 0, 1]
-        w = [10, 15, 15]
+        w = [15, 10, 10]
         first = random.choices(options[1:], weights=w[1:], k=1)
         rest = random.choices(options, weights=w, k=7)
         self.Q = first+rest
