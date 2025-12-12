@@ -40,7 +40,7 @@ class Game:
         self.scene.draw_waiting_text("Waiting for BLE connection...")
         pygame.display.flip()
         
-        while not ble.ble_connected:
+        while not ble.ble_connected[0] or not ble.ble_connected[1]:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False

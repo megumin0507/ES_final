@@ -89,7 +89,7 @@ class Scene:
             return None 
 
     def _load_sprites(self):        
-        self.background_img = pygame.image.load(f"{sprites_dir}background.png").convert_alpha()
+        self.background_img = pygame.image.load(f"{sprites_dir}background1.png").convert_alpha()
         self.textboxes_img = pygame.image.load(f"{sprites_dir}textbox.png").convert_alpha()
 
     def draw_result_text(self, text):

@@ -10,7 +10,7 @@ class Scene:
         self._load_sprites()
         self.screen = screen
         
-        Q_ypos = 100
+        Q_ypos = 60
         self.Q_slot_positions = [
             pygame.Vector2(91, Q_ypos),   # Slot 1
             pygame.Vector2(227, Q_ypos),  # Slot 2
@@ -29,7 +29,6 @@ class Scene:
 
     def load_game_scene(self, dt):
         self.screen.blit(self.background_img, (0, 0))
-        self.screen.blit(self.textboxes_img, (0, 0))
         for i in range(self.ans_length):
             note = self.Q_notes[i]
             pre_note = self.Q_notes[i-1] if i != 0 else None
@@ -84,15 +83,14 @@ class Scene:
 
 
     def _load_sprites(self):        
-        self.background_img = pygame.image.load(f"{sprites_dir}background.png").convert_alpha()
-        self.textboxes_img = pygame.image.load(f"{sprites_dir}textbox.png").convert_alpha()
+        self.background_img = pygame.image.load(f"{sprites_dir}background2.png").convert_alpha()
 
     def show_user_motion(self, motion_id, time, player: Player):
         """
         當接收到訊號時，顯示出來
         """
         if player.device_idx==0:
-            note_shown = Note(pygame.Vector2(91 + time/400*136, 350), motion_id)
+            note_shown = Note(pygame.Vector2(91 + time/400*136, 360), motion_id)
             self.player_notes.append(note_shown) #不分player
             print(f"Visual:p1 Drum {motion_id} hit!")
         else:
@@ -124,7 +122,7 @@ class Scene:
         screen = pygame.display.get_surface() 
         
         # 5. 畫上去
-        screen.blit(text_surface, pygame.Vector2(600, 350 if id ==0 else 550))
+        screen.blit(text_surface, pygame.Vector2(600, 360 if id ==0 else 550))
 
     def draw_waiting_text(self, text):
         """顯示等待 BLE 連接的文字"""

@@ -28,7 +28,7 @@ class BLE:
         self.char_uuid = char_uuid
         
         self.input_queue: "queue.Queue[ControllerPacket]" = queue.Queue()
-        self.ble_connected = False
+        self.ble_connected = [False, False]  # one per device
 
     def retrieve_pkt(self):
         return self.input_queue.get_nowait()
@@ -86,7 +86,7 @@ class BLE:
                         continue
 
                     logger.info(f"BLE[{device_index}]: connected to {address}")
-                    self.ble_connected = True
+                    self.ble_connected[device_index] = True
 
                     handler = self._make_notification_handler(device_index)
                     # logger.info(f"BLE[{device_index}]: starting notify on {self.char_uuid}")
@@ -104,7 +104,7 @@ class BLE:
                         except Exception:
                             pass
                         # logger.info(f"BLE[{device_index}]: notify stopped")
-                        self.ble_connected = False
+                        self.ble_connected[device_index] = False
 
             except Exception as e:
                 pass
