@@ -4,16 +4,16 @@ import math
 sprites_dir = ".\\sprites\\"
 
 class Note:
-    def __init__(self, pos: pygame.Vector2, id, delay: float = 1.0):
+    def __init__(self, pos: pygame.Vector2, target_x: float, id, speed: float):
         self.original_pos = pos.copy()
         self.pos = pos.copy()
+        self.target_x = target_x
+        self.speed = speed
         self.id = id
-        self.delay_duration = delay
-        self.jumped_delay_timer = self.delay_duration
         self.jumping = False
-        self.jumped = False
-        self.v = pygame.Vector2(0, 0)
-        self.a = pygame.Vector2(0, 5000)
+        self.is_hit = False
+        self.v = pygame.Vector2(-self.speed, 0)
+        self.a = pygame.Vector2(0, 0)
         self._load_sprites()
         options = [
             self.R_blue_img,
@@ -38,22 +38,16 @@ class Note:
         return self.img
 
     def get_pos(self, dt: float):
-        if self.jumping:
-            self.v += self.a * dt
-            self.pos += self.v * dt
-            if math.isclose(self.v.y, 1000, rel_tol=6e-2):
-                self.pos = self.original_pos
-                self.jumping = False
-                self.jumped = True
-        if self.jumped_delay_timer > 0:
-            self.jumped_delay_timer -= dt
-            if self.jumped_delay_timer <= 0:
-                self.jumped_delay_timer = 0
+        self.v += self.a * dt
+        self.pos += self.v * dt
         return self.pos
-    
-    def should_jump(self):
-        return not self.jumping and not self.jumped
     
     def jump(self):
         self.jumping = True
+        self.is_hit = True
+        self.v.x = self.speed/2
         self.v.y = -1000
+        self.a.y = 5000
+
+    def is_out_of_screen(self):
+        return self.pos.x < -100 or self.pos.y > 600
