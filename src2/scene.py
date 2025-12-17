@@ -11,7 +11,7 @@ class Scene:
         self.screen = screen
 
         # -----parameters-----
-        self.beat_unit = 200
+        self.beat_unit = 300
         
         Q_ypos = 60
         self.Q_slot_positions = [
@@ -96,11 +96,11 @@ class Scene:
         當接收到訊號時，顯示出來
         """
         if player.device_idx==0:
-            note_shown = Note(pygame.Vector2(91 + time/400*136, 360), motion_id)
+            note_shown = Note(pygame.Vector2(91 + time/self.beat_unit*136, 360), motion_id)
             self.player_notes.append(note_shown) #不分player
             print(f"Visual:p1 Drum {motion_id} hit!")
         else:
-            note_shown = Note(pygame.Vector2(91 + time/400*136, 550), motion_id)
+            note_shown = Note(pygame.Vector2(91 + time/self.beat_unit*136, 550), motion_id)
             self.player_notes.append(note_shown) #不分player
             print(f"Visual:p2 Drum {motion_id} hit!")
 

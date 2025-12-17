@@ -152,7 +152,7 @@ class Game:
             loss = 0
             for i in range(ans_length):
                 loss += abs(player.sequence_time[i] - ans_time[i])
-            if loss > 300:  # threshold 可調
+            if loss > self.scene.beat_unit*0.7:  # threshold 可調
                 quality = 1
             print(f"Player {player.device_idx+1}: Total time loss: {loss} ms")
         

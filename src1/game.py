@@ -56,7 +56,7 @@ class Game:
         pygame.display.flip()
         self.running = True
         pygame.time.wait(1000)
-
+        self.clock.tick()
         while self.running:
             
             dt = self.clock.tick(60) / 1000
@@ -94,7 +94,7 @@ class Game:
             self.scene.load_game_scene(dt)
             for note in self.scene.Q_notes:
                 if not note.is_hit:
-                    if note.pos.x + self.scene.GOOD_THRESHOLD - self.scene.TARGET_X < -self.scene.GOOD_THRESHOLD:
+                    if note.id != 2 and note.pos.x + self.scene.GOOD_THRESHOLD - self.scene.TARGET_X < -self.scene.GOOD_THRESHOLD:
                         self.combo = 0
                         note.is_hit = True
                         self.current_result_text = "MISS"

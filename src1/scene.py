@@ -11,7 +11,7 @@ class Scene:
         self.TARGET_X = 200
         
         # -----parameters-----
-        self.beat_unit = 200 
+        self.beat_unit = 300 
         self.NOTE_SPEED = 500  
         self.PERFECT_THRESHOLD = 42
         self.GOOD_THRESHOLD = 64
@@ -37,7 +37,12 @@ class Scene:
         
         options = [-1, 0, 1]
         w = [10, 10, 10]
-        sequence = random.choices(options, weights=w, k=8)
+        has_yellow = random.random() < 0.4
+        if has_yellow:
+            sequence = [2, -1, -1, -1, -1, -1, -1, -1]
+        else:
+            sequence = random.choices(options, weights=w, k=8)
+
         if sequence[0] == -1: sequence[0] = 0
 
         self.ans_class = []
@@ -57,11 +62,16 @@ class Scene:
             time_to_hit_sec = (start_delay_ms + current_time_ms) / 1000.0
             spawn_x = self.TARGET_X + (self.NOTE_SPEED * time_to_hit_sec)
             
+            note_length = 0
+            if note_id == 2:
+                note_length = self.NOTE_SPEED * 1.5
+
             new_note = Note(
                 pos=pygame.Vector2(spawn_x, self.Q_ypos), 
                 target_x=self.TARGET_X, 
                 id=note_id, 
-                speed=self.NOTE_SPEED
+                speed=self.NOTE_SPEED,
+                length=note_length
             )
             self.Q_notes.append(new_note)
 
@@ -76,12 +86,16 @@ class Scene:
 
         for note in self.Q_notes:
             if not note.is_hit:
+                note_end_x = note.pos.x + getattr(note, 'length', 0)
                 dist = abs(note.pos.x + self.GOOD_THRESHOLD - self.TARGET_X)
                 if dist < min_dist:
                     min_dist = dist
                     target_note = note
-        
-        if target_note and min_dist <= self.GOOD_THRESHOLD:
+
+        if target_note and target_note.id == 2:
+            if target_note.pos.x < self.TARGET_X and note_end_x > self.TARGET_X:
+                return "PERFECT" 
+        elif target_note and min_dist <= self.GOOD_THRESHOLD:
             if user_input_id % 2 == target_note.id % 2:
                 if min_dist <= self.PERFECT_THRESHOLD:
                     target_note.jump()
