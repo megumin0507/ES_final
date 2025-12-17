@@ -8,6 +8,10 @@ class Note:
         self.original_pos = pos.copy()
         self.pos = pos.copy()
         self.id = id
+        if id == 0:
+            self.sound = pygame.mixer.Sound('./sound/ka.wav')
+        else:
+            self.sound = pygame.mixer.Sound('./sound/don.wav')
         self.delay_duration = delay
         self.jumped_delay_timer = self.delay_duration
         self.jumping = False
@@ -51,5 +55,6 @@ class Note:
         return not self.jumping and not self.jumped
     
     def jump(self):
+        self.sound.play()
         self.jumping = True
         self.v.y = -1000

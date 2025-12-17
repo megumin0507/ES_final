@@ -20,8 +20,8 @@ class Game:
     def init(self):
         pygame.init()
         pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
-        self.don = pygame.mixer.Sound('don.wav')
-        self.ka = pygame.mixer.Sound('ka.wav')
+        self.don = pygame.mixer.Sound('./sound/don.wav')
+        self.ka = pygame.mixer.Sound('./sound/ka.wav')
         self.screen = pygame.display.set_mode(self.resolution)
         self.clock = pygame.time.Clock()
         self.scene = Scene(self.screen)
