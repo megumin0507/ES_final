@@ -9,6 +9,9 @@ class Scene:
         self._load_sprites()
         self.screen = screen
         self.TARGET_X = 200
+        
+        # -----parameters-----
+        self.beat_unit = 200 
         self.NOTE_SPEED = 500  
         self.PERFECT_THRESHOLD = 42
         self.GOOD_THRESHOLD = 64
@@ -29,7 +32,7 @@ class Scene:
             self.screen.blit(note.get_img(), note.pos)
 
     def set_random_sequence(self):
-        beat_unit = 200 
+        beat_unit = self.beat_unit
         self.notes = []
         
         options = [-1, 0, 1]

@@ -9,6 +9,9 @@ class Scene:
     def __init__(self, screen: pygame.Surface):
         self._load_sprites()
         self.screen = screen
+
+        # -----parameters-----
+        self.beat_unit = 200
         
         Q_ypos = 60
         self.Q_slot_positions = [
@@ -45,7 +48,7 @@ class Scene:
             self.screen.blit(player_note.get_img(), player_note.pos)
 
     def set_random_sequence(self):
-        beat_unit = 400 # const ms
+        beat_unit = self.beat_unit # const ms
         self.player_notes = [] # 只是清空
         
         options = [-1, 0, 1]

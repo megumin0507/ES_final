@@ -59,6 +59,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+            
 
             # 設置新序列
             current_time = pygame.time.get_ticks()
