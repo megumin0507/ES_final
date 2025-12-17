@@ -28,6 +28,9 @@ class Scene:
         
         self.player_notes: list[Note] = []  # 保存玩家輸入的 notes，不分player
         self.ans_length = 0
+        self.ans_time = [0]
+        self.ans_class = []
+        self.switch_interval = 1000
         self.set_random_sequence()
 
     def load_game_scene(self, dt):

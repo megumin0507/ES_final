@@ -20,7 +20,7 @@ class Scene:
         self.Q_notes: list[Note] = []
 
         self.ans_class = []
-        self.set_random_sequence()
+        self.switch_interval = 1000
 
     def load_game_scene(self, dt):
         self.screen.blit(self.background_img, (0, 0))
