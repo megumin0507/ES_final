@@ -121,7 +121,7 @@ class BLE:
             
             time = data[0]
             time += 256 * data[1]
-            buttons = data[2]
+            buttons = (data[2]-1)%2  # 1 or 2
 
             logger.info(f"  buttons = {buttons}, time = {time}")
             pkt = ControllerPacket(device_index=device_index, buttons=buttons, time=time)

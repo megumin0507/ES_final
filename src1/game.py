@@ -80,12 +80,12 @@ class Game:
                     self.buttons = pkt.buttons
                     self.time = pkt.time
 
-                    motion =  self.device_index*2 + self.buttons-1 
+                    motion =  self.device_index*2 + self.buttons
                     if 0 <= motion <= 3:
                         self.handle_input(motion)
-                        if self.buttons == 1:
+                        if self.buttons == 0:
                             self.ka.play()
-                        elif self.buttons == 2:
+                        elif self.buttons == 1:
                             self.don.play()
 
             except queue.Empty:

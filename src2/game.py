@@ -84,7 +84,7 @@ class Game:
                 while True:
                     pkt = ble.retrieve_pkt()
                     device_index = pkt.device_index
-                    button = pkt.buttons -1  # 0=側 1=下
+                    button = pkt.buttons  # 0=側 1=下
                     time = pkt.time
 
                     if button==0:
